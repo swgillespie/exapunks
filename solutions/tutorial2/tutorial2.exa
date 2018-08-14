@@ -1,0 +1,9 @@
+(defsolution tutorial2
+  (defexa xa
+    (link 800)
+    (grab 200)
+    (addi f f x)
+    (muli x f x)
+    (subi x f f)
+    (link 800)
+    (halt)))

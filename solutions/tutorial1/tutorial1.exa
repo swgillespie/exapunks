@@ -1,0 +1,6 @@
+(defsolution tutorial1
+  (defexa xa
+    (link 800)
+    (grab 200)
+    (link 800)
+    (halt)))

@@ -1,0 +1,17 @@
+(defsolution tutorial3
+  (defexa xa
+    (link 800)
+    (link 799)
+    (grab 199)
+    (copy f m)
+    (copy f m)
+    (wipe)
+    (halt))
+
+  (defexa xb
+    (link 800)
+    (make)
+    (copy m x)
+    (copy m f)
+    (copy x f)
+    (halt)))

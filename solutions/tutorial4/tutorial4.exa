@@ -1,0 +1,37 @@
+(defsolution tutorial4
+  (defexa xa
+    (link 800)
+    (grab 200)
+    (copy f x)
+    (wipe)
+    (make)
+    (link 800)
+    (mark loop_return)
+    (loop
+      (jump-if (> x 20) unroll_20)
+      (jump-if (> x 5)  unroll_10)
+      (jump-if (> x 2)  unroll_2)
+      (break-if (< x 0))
+      (copy x f)
+      (subi x 1 x))
+
+    (halt)
+
+    (mark unroll_20)
+    (unroll 15
+      ; Note that this is not the fastest way to unroll the loop
+      ; the exapunks @{M, N} macro form makes it possible to do
+      ; this in one repetition, but this compiler does not support it yet.
+      (copy x f)
+      (subi x 1 x))
+
+    (mark unroll_5)
+    (unroll 3
+      (copy x f)
+      (subi x 1 x))
+
+    (mark unroll_2)
+    (unroll 2
+      (copy x f)
+      (subi x 1 x))
+    (jump loop_return)))

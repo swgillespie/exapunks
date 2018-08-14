@@ -43,6 +43,9 @@
 (define (kill? form)
   (pair-with? form 'kill))
 
+(define (wipe? form)
+  (pair-with? form 'wipe))
+
 (define (seek? form)
   (pair-with? form 'seek))
 
@@ -70,6 +73,9 @@
 (define (subi? form)
   (pair-with? form 'subi))
 
+(define (muli? form)
+  (pair-with? form 'muli))
+
 (define (divi? form)
   (pair-with? form 'divi))
 
@@ -91,6 +97,12 @@
 (define (repl-target form)
   (cadr form))
 
+(define (mark? form)
+  (pair-with? form 'mark))
+
+(define (mark-label form)
+  (cadr form))
+
 (define (continue? form)
   (pair-with? form 'continue))
 
@@ -102,6 +114,12 @@
 
 (define (break-if? form)
   (pair-with? form 'break-if))
+
+(define (jump? form)
+  (pair-with? form 'jump))
+
+(define (jump-target form)
+  (cadr form))
 
 (define (jump-if? form)
   (pair-with? form 'jump-if))
@@ -120,6 +138,9 @@
 
 (define (conditional-jump-expr form)
   (cadr form))
+
+(define (conditional-jump-target form)
+  (caddr form))
 
 (define (condidional-eof? form)
   (eq? form 'eof))
@@ -197,6 +218,9 @@
 (define (gen-make)
   (printf "MAKE~n"))
 
+(define (gen-wipe)
+  (printf "WIPE~n"))
+
 (define (gen-seek num)
   (validate-num-or-reg num)
   (printf "SEEK ~a~n" num))
@@ -211,6 +235,9 @@
 
 (define (gen-subi arg1 arg2 arg3)
   (gen-arith "SUBI" arg1 arg2 arg3))
+
+(define (gen-muli arg1 arg2 arg3)
+  (gen-arith "MULI" arg1 arg2 arg3))
 
 (define (gen-divi arg1 arg2 arg3)
   (gen-arith "DIVI" arg1 arg2 arg3))
@@ -257,6 +284,7 @@
 (define (compile-exa form)
   (if (exa? form)
     (begin
+      (gen-note "")
       (printf "NOTE ---- Exa ~a ----~n" (exa-name form))
       (map compile-instr-form (exa-instr-forms form)))
     (error "unexpected exa-level form, expected 'defexa'")))
@@ -270,12 +298,17 @@
     ((copy? form) (gen-copy (copy-src form) (copy-dest form)))
     ((addi? form) (gen-addi (arith-arg-1 form) (arith-arg-2 form) (arith-arg-3 form)))
     ((subi? form) (gen-subi (arith-arg-1 form) (arith-arg-2 form) (arith-arg-3 form)))
+    ((muli? form) (gen-muli (arith-arg-1 form) (arith-arg-2 form) (arith-arg-3 form)))
     ((divi? form) (gen-divi (arith-arg-1 form) (arith-arg-2 form) (arith-arg-3 form)))
     ((modi? form) (gen-modi (arith-arg-1 form) (arith-arg-2 form) (arith-arg-3 form)))
     ((repl? form) (gen-repl (repl-target form)))
     ((kill? form) (gen-kill))
+    ((wipe? form) (gen-wipe))
+    ((make? form) (gen-make))
+    ((mark? form) (gen-mark (mark-label form)))
     ((unroll? form) (compile-unroll form))
     ((jump-if? form) (compile-jump-if form))
+    ((jump? form) (gen-jump (jump-target form)))
     ((loop? form) (compile-loop form))
     (else (error "unknown instruction form" form))))
 
@@ -304,10 +337,11 @@
   (compile-conditional (conditional-jump-expr form))
   (gen-tjmp exit))
 
-(define (compile-jump-if form target)
+(define (compile-jump-if form)
   (compile-conditional (conditional-jump-expr form))
-  (validate-label target)
-  (gen-tjmp target))
+  (let ((target (conditional-jump-target form)))
+    (validate-label target)
+    (gen-tjmp target)))
 
 (define (compile-conditional form)
   (validate-simple-expression form)

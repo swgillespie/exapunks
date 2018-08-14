@@ -1,0 +1,41 @@
+(defsolution digital-library-project
+  (defexa xa
+    (loop
+      (break-if eof)
+      (copy f x)
+      (repl fetch))
+
+    (halt)
+
+    (mark fetch)
+    (mode)
+    (link 800)
+    (loop
+      (break-if (< x 100))
+      (link 800)
+      (subi x 100 x))
+    
+    (addi x 200 x)
+    (grab x)
+    (repl copy_receiver)
+    (loop
+      (break-if eof)
+      (copy f m))
+    (copy -1 m)
+    (halt)
+
+    (mark copy_receiver)
+    (make)
+    (loop
+      (copy m x)
+      (break-if (= x -1))
+      (copy x f))
+    (seek -9999)
+    (copy f x)
+    (loop
+      (break-if (< x 100))
+      (link -1)
+      (subi x 100 x))
+    (link -1)
+    (halt)))
+    

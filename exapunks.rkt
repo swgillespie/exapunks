@@ -127,6 +127,18 @@
 (define (jump-if-target form)
   (caddr form))
 
+(define (if? form)
+  (pair-with? form 'if))
+
+(define (if-cond form)
+  (cadr form))
+
+(define (if-true-branch form)
+  (cddr form))
+
+(define (mode? form)
+  (pair-with? form 'mode))
+
 (define (unroll? form)
   (pair-with? form 'unroll))
 
@@ -215,6 +227,10 @@
   (validate-label label)
   (printf "TJMP ~a~n" label))
 
+(define (gen-fjmp label)
+  (validate-label label)
+  (printf "FJMP ~a~n" label))
+
 (define (gen-make)
   (printf "MAKE~n"))
 
@@ -270,6 +286,9 @@
 (define (gen-kill)
   (printf "KILL~n"))
 
+(define (gen-mode)
+  (printf "MODE~n"))
+
 (define (compile-form form)
   (if (solution? form)
     (begin
@@ -305,11 +324,13 @@
     ((kill? form) (gen-kill))
     ((wipe? form) (gen-wipe))
     ((make? form) (gen-make))
+    ((mode? form) (gen-mode))
     ((mark? form) (gen-mark (mark-label form)))
     ((unroll? form) (compile-unroll form))
     ((jump-if? form) (compile-jump-if form))
     ((jump? form) (gen-jump (jump-target form)))
     ((loop? form) (compile-loop form))
+    ((if? form) (compile-if form))
     (else (error "unknown instruction form" form))))
 
 (define (compile-loop form)
@@ -363,6 +384,13 @@
                              (map compile-instr-form body)
                              (do-unroll body (- count 1)))))))
     (do-unroll (unroll-body form) (unroll-count form))))
+
+(define (compile-if form)
+  (let ((exit-label (make-label "if_exit")))
+    (compile-conditional (if-cond form))
+    (gen-fjmp exit-label)
+    (map compile-instr-form (if-true-branch form))
+    (gen-mark exit-label)))
 
 (define (compile filename)
   (let* ((port (open-input-file filename))

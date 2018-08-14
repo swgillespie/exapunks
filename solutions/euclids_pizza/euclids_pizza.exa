@@ -1,0 +1,14 @@
+(defsolution exa
+  (defexa xa
+    (grab 300)
+    (unroll 5
+      (copy f m))
+    (halt))
+
+  (defexa xb
+    (link 800)
+    (grab 200)
+    (seek 9999)
+    (unroll 5
+      (copy m f))
+    (halt)))
